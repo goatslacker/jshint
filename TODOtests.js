@@ -1,7 +1,5 @@
-//            bitwise     : true, // if bitwise operators should not be allowed
             browser     : true, // if the standard browser globals should be predefined
             couch       : true, // if CouchDB globals should be predefined
-//            debug       : true, // if debugger statements should be allowed
 //            devel       : true, // if logging globals should be predefined (console,
                                 // alert, etc.)
             dojo        : true, // if Dojo Toolkit globals should be predefined

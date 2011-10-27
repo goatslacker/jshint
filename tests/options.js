@@ -439,6 +439,14 @@ exports.debug = function () {
     TestRun().test(code, { debug: true });
 };
 
+exports.devel = function () {
+    var src = fs.readFileSync(__dirname + '/fixtures/devel.js', 'utf8');
+
+    TestRun().test(src, { devel: true });
+
+    TestRun().test(src, { devel: false }); // TODO why doesn't this work?
+};
+
 /** Option `eqeqeq` requires you to use === all the time. */
 exports.eqeqeq = function () {
     var src = fs.readFileSync(__dirname + '/fixtures/eqeqeq.js', 'utf8');
@@ -452,6 +460,14 @@ exports.eqeqeq = function () {
         .addError(5, "Expected '!==' and instead saw '!='.")
         .addError(8, "Expected '===' and instead saw '=='.")
         .test(src, { eqeqeq: true });
+};
+
+exports.eqnull = function () {
+    var src = fs.readFileSync(__dirname + '/fixtures/eqnull.js', 'utf8');
+
+    TestRun().test(src);
+
+    TestRun().test(src, { eqnull: false });
 };
 
 /** Option `evil` allows the use of eval. */

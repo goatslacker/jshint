@@ -1,3 +1,4 @@
+/*jshint eqnull: true */
 var foo;
 var bar = null;
 var baz;
