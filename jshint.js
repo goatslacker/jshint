@@ -59,6 +59,7 @@
      character : The character (relative to 0) at which the lint was found
      reason    : The problem
      evidence  : The text line in which the problem occurred
+     option    : The option associated with the error
      raw       : The raw message before the details were inserted
      a         : The first detail
      b         : The second detail
@@ -90,7 +91,8 @@
              line: NUMBER,
              character: NUMBER,
              reason: STRING,
-             evidence: STRING
+             evidence: STRING,
+             option: STRING
          }
      ],
      functions: [
@@ -213,10 +215,10 @@
  log, loopfunc, m, match, maxerr, maxlen, member,message, meta, module, moveBy,
  moveTo, mootools, multistr, name, navigator, new, newcap, noarg, node, noempty, nomen,
  nonew, nonstandard, nud, onbeforeunload, onblur, onerror, onevar, onecase, onfocus,
- onload, onresize, onunload, open, openDatabase, openURL, opener, opera, options, outer, param,
- parent, parseFloat, parseInt, passfail, plusplus, predef, print, process, prompt,
- proto, prototype, prototypejs, push, quit, range, raw, reach, reason, regexp,
- readFile, readUrl, regexdash, removeEventListener, replace, report, require,
+ onload, onresize, onunload, open, openDatabase, openURL, opener, opera, option,
+ options, outer, param, parent, parseFloat, parseInt, passfail, plusplus, predef, print,
+ process, prompt, proto, prototype, prototypejs, push, quit, range, raw, reach, reason,
+ regexp, readFile, readUrl, regexdash, removeEventListener, replace, report, require,
  reserved, resizeBy, resizeTo, resolvePath, resumeUpdates, respond, rhino, right,
  runCommand, scroll, screen, scripturl, scrollBy, scrollTo, scrollbar, search, seal,
  send, serialize, sessionStorage, setInterval, setTimeout, shift, slice, sort,spawn,
@@ -520,6 +522,14 @@ var JSHINT = (function () {
         lookahead,
         member,
         membersOnly,
+
+        messages = {
+            latedef: "'{a}' was used before it was defined.",
+            maxlen: "Line too long.",
+            trailing: "Trailing whitespace.",
+            regexp: "Insecure '{a}'.",
+            shadow: "'{a}' is already defined."
+        },
 
         mootools = {
             '$'             : false,
@@ -939,19 +949,24 @@ var JSHINT = (function () {
     }
 
     function warning(m, t, a, b, c, d) {
-        var ch, l, w;
+        var ch, l, w, opt = "";
         t = t || nexttoken;
         if (t.id === '(end)') {  // `~
             t = token;
         }
         l = t.line || 0;
         ch = t.from || 0;
+        if (messages.hasOwnProperty(m)) {
+            opt = m;
+            m = messages[opt];
+        }
         w = {
             id: '(error)',
             raw: m,
             evidence: lines[l - 1] || '',
             line: l,
             character: ch,
+            option: opt,
             a: a,
             b: b,
             c: c,
@@ -1674,10 +1689,10 @@ klass:                                  do {
         if (is_own(funct, t) && !funct['(global)']) {
             if (funct[t] === true) {
                 if (option.latedef)
-                    warning("'{a}' was used before it was defined.", nexttoken, t);
+                    warning("latedef", nexttoken, t);
             } else {
                 if (!option.shadow)
-                    warning("'{a}' is already defined.", nexttoken, t);
+                    warning("shadow", nexttoken, t);
             }
         }
 
@@ -1686,7 +1701,7 @@ klass:                                  do {
             global[t] = funct;
             if (is_own(implied, t)) {
                 if (option.latedef)
-                    warning("'{a}' was used before it was defined.", nexttoken, t);
+                    warning("latedef", nexttoken, t);
                 delete implied[t];
             }
         } else {
