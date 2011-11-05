@@ -255,3 +255,12 @@ exports.globalDeclarations = function () {
 
     TestRun().test(src.join('\n'));
 };
+
+exports.argsInCatchReused = function () {
+    var src = fs.readFileSync(__dirname + '/fixtures/trycatch.js', 'utf8');
+    TestRun()
+        .addError(6, "'e' is already defined.")
+        .addError(12, "Do not assign to the exception parameter.")
+        .test(src);
+
+};
