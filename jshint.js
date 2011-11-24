@@ -221,7 +221,7 @@
  runCommand, scroll, screen, scripturl, scrollBy, scrollTo, scrollbar, search, seal,
  send, serialize, sessionStorage, setInterval, setTimeout, shift, slice, sort,spawn,
  split, stack, status, start, strict, sub, substr, supernew, shadow, supplant, sum,
- sync, test, toLowerCase, toString, toUpperCase, toint32, token, top, trailing, type,
+ sync, test, toLowerCase, toString, toUpperCase, toint32, token, top, trailing, type, typeconfusion,
  typeOf, Uint16Array, Uint32Array, Uint8Array, undef, unused, urls, validthis, value, valueOf,
  var, version, WebSocket, white, window, Worker, wsh*/
 
@@ -2138,6 +2138,27 @@ loop:   for (;;) {
     }
 
 
+    function determineType(token) {
+        if (token.identifier) {
+            if (token.value === "function") {
+                return "function";
+            } else {
+                return funct[token.value];
+            }
+        } else if (/\d/.test(token.value)) {
+            return "number";
+        } else if (/\w/.test(token.value)) {
+            return "string";
+        } else if (token.value === "[") {
+            return "array";
+        } else if (token.value === "{") {
+            return "object";
+        } else {
+            return "unknown";
+        }
+    }
+
+
     function relation(s, f) {
         var x = symbol(s, 100);
         x.led = function (left) {
@@ -2177,7 +2198,7 @@ loop:   for (;;) {
     function assignop(s, f) {
         symbol(s, 20).exps = true;
         return infix(s, function (left, that) {
-            var l;
+            var l, type;
             that.left = left;
             if (predefined[left.value] === false &&
                     scope[left.value]['(global)'] === true) {
@@ -2189,17 +2210,28 @@ loop:   for (;;) {
                 if (option.esnext && funct[left.value] === 'const') {
                     warning("Attempting to override '{a}' which is a constant", left, left.value);
                 }
+
                 if (left.id === '.' || left.id === '[') {
                     if (!left.left || left.left.value === 'arguments') {
                         warning('Bad assignment.', that);
                     }
                     that.right = expression(19);
+                    type = determineType(that.right);
+                    if (type !== funct[left.value] && option.typeconfusion) {
+                        warning("Confusing type '{a}'. Expected '{b}' and instead saw '{c}'.",
+                                  left, left.value, funct[left.value], type);
+                    }
                     return that;
                 } else if (left.identifier && !left.reserved) {
                     if (funct[left.value] === 'exception') {
                         warning("Do not assign to the exception parameter.", left);
                     }
                     that.right = expression(19);
+                    type = determineType(that.right);
+                    if (type !== funct[left.value] && option.typeconfusion) {
+                        warning("Confusing type '{a}'. Expected '{b}' and instead saw '{c}'.",
+                                  left, left.value, funct[left.value], type);
+                    }
                     return that;
                 }
                 if (left === syntax['function']) {
@@ -2622,7 +2654,7 @@ loop:   for (;;) {
                 // Change 'unused' to 'var', and reject labels.
                 switch (funct[v]) {
                 case 'unused':
-                    funct[v] = 'var';
+                    funct[v] = determineType(peek());
                     break;
                 case 'unction':
                     funct[v] = 'function';
@@ -3379,6 +3411,7 @@ loop:   for (;;) {
                 nonadjacent(token, nexttoken);
                 advance('=');
                 nonadjacent(token, nexttoken);
+                funct[id] = determineType(nexttoken);
                 if (nexttoken.id === 'undefined') {
                     warning("It is not necessary to initialize '{a}' to 'undefined'.", token, id);
                 }
