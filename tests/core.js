@@ -296,3 +296,10 @@ exports.testJQuery = function () {
         .addError(9209, "Mixed spaces and tabs.")
         .test(src);
 };
+
+exports.testrawonerror = function () {
+    JSHINT(";", { maxerr: 1 });
+    var errors = JSHINT.errors;
+    var tme = errors.pop();
+    assert.equal(tme.raw, "Too many errors.");
+};

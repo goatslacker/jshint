@@ -4034,7 +4034,7 @@ loop:   for (;;) {
                     reason    : e.message,
                     line      : e.line || nexttoken.line,
                     character : e.character || nexttoken.from
-                }, null);
+                });
             }
         }
         return JSHINT.errors.length === 0;
