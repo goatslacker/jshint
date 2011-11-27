@@ -934,6 +934,7 @@ var JSHINT = (function () {
             name: 'JSHintError',
             line: line,
             character: chr,
+            raw: message,
             message: message + " (" + percentage + "% scanned)."
         };
     }
@@ -4029,6 +4030,7 @@ loop:   for (;;) {
         } catch (e) {
             if (e) {
                 JSHINT.errors.push({
+                    raw       : e.raw,
                     reason    : e.message,
                     line      : e.line || nexttoken.line,
                     character : e.character || nexttoken.from
