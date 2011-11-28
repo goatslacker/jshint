@@ -817,8 +817,8 @@ exports.trailing = function () {
     TestRun().test(src);
 
     TestRun()
-        .addError(8, "Trailing whitespace.")
-        .addError(9, "Trailing whitespace.")
+        .addError(8, "Trailing whitespace.", { option: "trailing" })
+        .addError(9, "Trailing whitespace.", { option: "trailing" })
         .test(src, { trailing: true });
 };
 

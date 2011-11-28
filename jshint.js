@@ -213,8 +213,8 @@
  log, loopfunc, m, match, maxerr, maxlen, member,message, meta, module, moveBy,
  moveTo, mootools, multistr, name, navigator, new, newcap, noarg, node, noempty, nomen,
  nonew, nonstandard, nud, onbeforeunload, onblur, onerror, onevar, onecase, onfocus,
- onload, onresize, onunload, open, openDatabase, openURL, opener, opera, options, outer, param,
- parent, parseFloat, parseInt, passfail, plusplus, predef, print, process, prompt,
+ onload, onresize, onunload, open, openDatabase, openURL, opener, opera, option, options, outer,
+ param, parent, parseFloat, parseInt, passfail, plusplus, predef, print, process, prompt,
  proto, prototype, prototypejs, push, quit, range, raw, reach, reason, regexp,
  readFile, readUrl, regexdash, removeEventListener, replace, report, require,
  reserved, resizeBy, resizeTo, resolvePath, resumeUpdates, respond, rhino, right,
@@ -589,6 +589,9 @@ var JSHINT = (function () {
 
         noreach,
         option,
+        options = {
+            trailing: "Trailing whitespace."
+        },
         predefined,     // Global variables defined by option
         prereg,
         prevtoken,
@@ -943,7 +946,11 @@ var JSHINT = (function () {
     }
 
     function warning(m, t, a, b, c, d) {
-        var ch, l, w;
+        var ch, l, w, opt;
+        if (options[m]) {
+            opt = m;
+            m = options[opt];
+        }
         t = t || nexttoken;
         if (t.id === '(end)') {  // `~
             t = token;
@@ -952,6 +959,7 @@ var JSHINT = (function () {
         ch = t.from || 0;
         w = {
             id: '(error)',
+            option: opt,
             raw: m,
             evidence: lines[l - 1] || '',
             line: l,
@@ -1027,7 +1035,7 @@ var JSHINT = (function () {
             // Check for trailing whitespaces
             tw = /\s+$/.test(s);
             if (option.trailing && tw && !/^\s+$/.test(s)) {
-                warningAt("Trailing whitespace.", line, tw);
+                warningAt("trailing", line, tw);
             }
             return true;
         }
