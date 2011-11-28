@@ -590,6 +590,27 @@ var JSHINT = (function () {
         noreach,
         option,
         options = {
+            scripturl: "Script URL.",
+            proto: "The '{a}' property is deprecated.",
+            iterator: "'{a}' is only available in JavaScript 1.7.",
+            nomen: "Unexpected {a} in '{b}'.",
+            multistr: "Avoid EOL escapement.",
+            regexp: "Insecure '{a}'.",
+            regexdash: "Unescaped '{a}'.",
+            latedef: "'{a}' was used before it was defined.",
+            shadow: "'{a}' is already defined.",
+            laxbreak: "Bad line breaking before '{a}'.",
+            bitwise: "Unexpected use of '{a}'.",
+            nonew: "Do not use 'new' for side effects.",
+            asi: "Missing semicolon.",
+            strict: "Missing \"use strict\" statement.",
+            curly: "Expected '{a}' and instead saw '{b}'.",
+            noempty: "Empty block.",
+            undef: "'{a}' is not defined.",
+            eqeqeq: "Expected '{a}' and instead saw '{b}'.",
+            newcap: "A constructor name should start with an uppercase letter.",
+            supernew: "Missing '()' invoking a constructor.",
+            maxlen:   "Line too long.",
             trailing: "Trailing whitespace."
         },
         predefined,     // Global variables defined by option
@@ -1030,7 +1051,7 @@ var JSHINT = (function () {
                 warningAt("Unsafe character.", line, at);
 
             if (option.maxlen && option.maxlen < s.length)
-                warningAt("Line too long.", line, s.length);
+                warningAt("maxlen", line, s.length);
 
             // Check for trailing whitespaces
             tw = /\s+$/.test(s);
@@ -1055,22 +1076,20 @@ var JSHINT = (function () {
             t = Object.create(t);
             if (type === '(string)' || type === '(range)') {
                 if (!option.scripturl && jx.test(value)) {
-                    warningAt("Script URL.", line, from);
+                    warningAt("scripturl", line, from);
                 }
             }
             if (type === '(identifier)') {
                 t.identifier = true;
                 if (value === '__proto__' && !option.proto) {
-                    warningAt("The '{a}' property is deprecated.",
-                        line, from, value);
+                    warningAt("proto", line, from, value);
                 } else if (value === '__iterator__' && !option.iterator) {
-                    warningAt("'{a}' is only available in JavaScript 1.7.",
-                        line, from, value);
+                    warningAt("iterator", line, from, value);
                 } else if (option.nomen && (value.charAt(0) === '_' ||
                          value.charAt(value.length - 1) === '_')) {
                     if (!option.node || token.id == '.' ||
                             (value != '__dirname' && value != '__filename')) {
-                        warningAt("Unexpected {a} in '{b}'.", line, from, "dangling '_'", value);
+                        warningAt("nomen", line, from, "dangling '_'", value);
                     }
                 }
             }
@@ -1253,7 +1272,7 @@ unclosedString:     for (;;) {
                                 allowNewLine = true;
                                 if (option.multistr) {
                                     if (jsonmode) {
-                                        warningAt("Avoid EOL escapement.", line, character);
+                                        warningAt("multistr", line, character);
                                     }
                                     c = '';
                                     character -= 1;
@@ -1475,7 +1494,7 @@ unclosedString:     for (;;) {
                                         if (c === '^') {
                                             l += 1;
                                             if (option.regexp) {
-                                                warningAt("Insecure '{a}'.",
+                                                warningAt("regexp",
                                                         line, from + l, c);
                                             } else if (s.charAt(l) === ']') {
                                                 errorAt("Unescaped '{a}'.",
@@ -1513,7 +1532,7 @@ klass:                                  do {
                                                 } else {
                                                     if (option.regexdash !== (l === 2 || (l === 3 &&
                                                         s.charAt(2) === '^'))) {
-                                                        warningAt("Unescaped '{a}'.",
+                                                        warningAt("regexdash",
                                                             line, from + l - 1, '-');
                                                     }
                                                     isLiteral = true;
@@ -1521,7 +1540,7 @@ klass:                                  do {
                                                 break;
                                             case ']':
                                                 if (isInRange && !option.regexdash) {
-                                                    warningAt("Unescaped '{a}'.",
+                                                    warningAt("regexdash",
                                                             line, from + l - 1, '-');
                                                 }
                                                 break klass;
@@ -1578,7 +1597,7 @@ klass:                                  do {
                                         break;
                                     case '.':
                                         if (option.regexp) {
-                                            warningAt("Insecure '{a}'.", line,
+                                            warningAt("regexp", line,
                                                     from + l, c);
                                         }
                                         break;
@@ -1683,10 +1702,10 @@ klass:                                  do {
         if (is_own(funct, t) && !funct['(global)']) {
             if (funct[t] === true) {
                 if (option.latedef)
-                    warning("'{a}' was used before it was defined.", nexttoken, t);
+                    warning("latedef", nexttoken, t);
             } else {
                 if (!option.shadow && type !== "exception")
-                    warning("'{a}' is already defined.", nexttoken, t);
+                    warning("shadow", nexttoken, t);
             }
         }
 
@@ -1695,7 +1714,7 @@ klass:                                  do {
             global[t] = funct;
             if (is_own(implied, t)) {
                 if (option.latedef)
-                    warning("'{a}' was used before it was defined.", nexttoken, t);
+                    warning("latedef", nexttoken, t);
                 delete implied[t];
             }
         } else {
@@ -1991,7 +2010,7 @@ loop:   for (;;) {
         left = left || token;
         right = right || nexttoken;
         if (!option.laxbreak && left.line !== right.line) {
-            warning("Bad line breaking before '{a}'.", right, right.id);
+            warning("laxbreak", right, right.id);
         } else if (option.white) {
             left = left || token;
             right = right || nexttoken;
@@ -2026,7 +2045,7 @@ loop:   for (;;) {
     function comma() {
         if (token.line !== nexttoken.line) {
             if (!option.laxbreak) {
-                warning("Bad line breaking before '{a}'.", token, nexttoken.id);
+                warning("laxbreak", token, nexttoken.id);
             }
         } else if (!token.comment && token.character !== nexttoken.from && option.white) {
             token.from += (token.character - token.from);
@@ -2230,7 +2249,7 @@ loop:   for (;;) {
         reserveName(x);
         x.led = (typeof f === 'function') ? f : function (left) {
             if (option.bitwise) {
-                warning("Unexpected use of '{a}'.", this, this.id);
+                warning("bitwise", this, this.id);
             }
             this.left = left;
             this.right = expression(p);
@@ -2244,7 +2263,7 @@ loop:   for (;;) {
         symbol(s, 20).exps = true;
         return infix(s, function (left, that) {
             if (option.bitwise) {
-                warning("Unexpected use of '{a}'.", that, that.id);
+                warning("bitwise", that, that.id);
             }
             nonadjacent(prevtoken, token);
             nonadjacent(token, nexttoken);
@@ -2383,7 +2402,7 @@ loop:   for (;;) {
                 warning("Expected an assignment or function call and instead saw an expression.",
                     token);
             } else if (option.nonew && r.id === '(' && r.left.id === 'new') {
-                warning("Do not use 'new' for side effects.");
+                warning("nonew");
             }
 
             if (nexttoken.id !== ';') {
@@ -2393,7 +2412,7 @@ loop:   for (;;) {
                     // Otherwise, complain about missing semicolon.
                     if (!option.lastsemic || nexttoken.id != '}' ||
                             nexttoken.line != token.line) {
-                        warningAt("Missing semicolon.", token.line, token.character);
+                        warningAt("asi", token.line, token.character);
                     }
                 }
             } else {
@@ -2528,7 +2547,7 @@ loop:   for (;;) {
 
                     if (option.strict && funct['(context)']['(global)']) {
                         if (!m["use strict"] && !directive["use strict"]) {
-                            warning("Missing \"use strict\" statement.");
+                            warning("strict");
                         }
                     }
                 }
@@ -2553,7 +2572,7 @@ loop:   for (;;) {
                   nexttoken, '{', nexttoken.value);
         } else {
             if (!stmt || option.curly)
-                warning("Expected '{a}' and instead saw '{b}'.",
+                warning("curly",
                         nexttoken, '{', nexttoken.value);
 
             noreach = true;
@@ -2567,7 +2586,7 @@ loop:   for (;;) {
         if (!ordinary || !option.funcscope) scope = s;
         inblock = b;
         if (ordinary && option.noempty && (!a || a.length === 0)) {
-            warning("Empty block.");
+            warning("noempty");
         }
         return a;
     }
@@ -2656,7 +2675,7 @@ loop:   for (;;) {
                 // if we're inside of typeof or delete.
                 if (anonname != 'typeof' && anonname != 'delete' &&
                     option.undef && typeof predefined[v] !== 'boolean') {
-                    isundef(funct, "'{a}' is not defined.", token, v);
+                    isundef(funct, "undef", token, v);
                 }
                 note_implied(token);
             } else {
@@ -2689,7 +2708,7 @@ loop:   for (;;) {
                         // if the base object of a reference is null so no need to
                         // display warning if we're inside of typeof or delete.
                         if (anonname != 'typeof' && anonname != 'delete' && option.undef) {
-                            isundef(funct, "'{a}' is not defined.", token, v);
+                            isundef(funct, "undef", token, v);
                         }
                         funct[v] = true;
                         note_implied(token);
@@ -2803,7 +2822,7 @@ loop:   for (;;) {
         var eqnull = option.eqnull && (left.value == 'null' || right.value == 'null');
 
         if (!eqnull && option.eqeqeq)
-            warning("Expected '{a}' and instead saw '{b}'.", this, '===', '==');
+            warning("eqeqeq", this, '===', '==');
         else if (isPoorRelation(left))
             warning("Use '{a}' to compare with '{b}'.", this, '===', left.value);
         else if (isPoorRelation(right))
@@ -2817,7 +2836,7 @@ loop:   for (;;) {
                 (left.value == 'null' || right.value == 'null');
 
         if (!eqnull && option.eqeqeq) {
-            warning("Expected '{a}' and instead saw '{b}'.",
+            warning("eqeqeq",
                     this, '!==', '!=');
         } else if (isPoorRelation(left)) {
             warning("Use '{a}' to compare with '{b}'.",
@@ -2901,7 +2920,7 @@ loop:   for (;;) {
 
     prefix('~', function () {
         if (option.bitwise) {
-            warning("Unexpected '{a}'.", this, '~');
+            warning("bitwise", this, '~');
         }
         expression(150);
         return this;
@@ -2944,8 +2963,7 @@ loop:   for (;;) {
                     if (c.id !== 'function') {
                         i = c.value.substr(0, 1);
                         if (option.newcap && (i < 'A' || i > 'Z')) {
-                            warning("A constructor name should start with an uppercase letter.",
-                                token);
+                            warning("newcap", token);
                         }
                     }
                 }
@@ -2960,7 +2978,7 @@ loop:   for (;;) {
         }
         adjacent(token, nexttoken);
         if (nexttoken.id !== '(' && !option.supernew) {
-            warning("Missing '()' invoking a constructor.");
+            warning("supernew");
         }
         this.first = c;
         return this;
