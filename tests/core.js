@@ -9,7 +9,7 @@ var JSHINT  = require('../jshint.js').JSHINT,
 exports.checkJSHint = function () {
     var res = JSHINT(fs.readFileSync(__dirname + "/../jshint.js", "utf8"), {
             bitwise: true,
-            eqeqeqe: true,
+            eqeqeq: true,
             forin: true,
             immed: true,
             latedef: true,
@@ -39,7 +39,7 @@ exports.checkRhino = function () {
     var src = fs.readFileSync(__dirname + "/../env/rhino.js", "utf8");
     TestRun("jshint-rhino").test(src, {
             bitwise: true,
-            eqeqeqe: true,
+            eqeqeq: true,
             forin: true,
             immed: true,
             latedef: true,
@@ -72,7 +72,7 @@ exports.checkTestFiles = function () {
         var src = fs.readFileSync(__dirname + '/../tests/' + name, 'utf8'),
             res = JSHINT(src, {
                 bitwise: true,
-                eqeqeqe: true,
+                eqeqeq: true,
                 forin: true,
                 immed: true,
                 latedef: true,
@@ -381,4 +381,21 @@ exports.testRawOnError = function () {
     assert.equal(JSHINT.errors[0].raw, 'Unnecessary semicolon.');
     assert.equal(JSHINT.errors[1].raw, 'Too many errors.');
     assert.equal(JSHINT.errors[2], null);
+};
+
+exports.yesEmptyStmt = function () {
+    var src = fs.readFileSync(__dirname + '/fixtures/emptystmt.js', 'utf8');
+
+    TestRun()
+        .addError(1, "Expected an identifier and instead saw ';'.")
+        .addError(6, "Expected an assignment or function call and instead saw an expression.")
+        .addError(10, "Unnecessary semicolon.")
+        .addError(17, "Unnecessary semicolon.")
+        .test(src, { curly: false });
+
+    TestRun()
+        .addError(1, "Expected an identifier and instead saw ';'.")
+        .addError(10, "Unnecessary semicolon.")
+        .addError(17, "Unnecessary semicolon.")
+        .test(src, { curly: false, expr: true });
 };
