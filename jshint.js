@@ -257,6 +257,7 @@ var JSHINT = (function () {
         // These are the JSHint boolean options.
         boolOptions = {
             asi         : true, // if automatic semicolon insertion should be tolerated
+            auto_indent : true,
             bitwise     : true, // if bitwise operators should not be allowed
             boss        : true, // if advanced usage of assignments should be allowed
             browser     : true, // if the standard browser globals should be predefined
@@ -333,6 +334,7 @@ var JSHINT = (function () {
         valOptions = {
             maxlen: false,
             indent: false,
+            indentpref: false,
             maxerr: false,
             predef: false
         },
